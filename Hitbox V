@@ -1,0 +1,193 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local boxColor = Color3.fromRGB(255, 0, 0)
+local outlineColor = Color3.fromRGB(255, 0, 0)
+local showHitboxes = true
+local guiVisible = true
+
+-- Funzioni hitbox
+local function highlightHitbox(part)
+	if not showHitboxes then return end
+	if not part:FindFirstChild("HitboxHighlight") then
+		local box = Instance.new("BoxHandleAdornment")
+		box.Name = "HitboxHighlight"
+		box.Size = part.Size
+		box.Adornee = part
+		box.AlwaysOnTop = true
+		box.ZIndex = 10
+		box.Color3 = boxColor
+		box.Transparency = 0.85
+		box.Parent = part
+	else
+		part.HitboxHighlight.Color3 = boxColor
+	end
+
+	if not part:FindFirstChild("HitboxOutline") then
+		local outline = Instance.new("SelectionBox")
+		outline.Name = "HitboxOutline"
+		outline.Adornee = part
+		outline.LineThickness = 0.05
+		outline.SurfaceTransparency = 1
+		outline.Color3 = outlineColor
+		outline.Parent = part
+	else
+		part.HitboxOutline.Color3 = outlineColor
+	end
+end
+
+local function removeHitboxes()
+	for _, player in pairs(Players:GetPlayers()) do
+		if player.Character then
+			local hitbox = player.Character:FindFirstChild("HumanoidRootPart")
+			if hitbox then
+				if hitbox:FindFirstChild("HitboxHighlight") then hitbox.HitboxHighlight:Destroy() end
+				if hitbox:FindFirstChild("HitboxOutline") then hitbox.HitboxOutline:Destroy() end
+			end
+		end
+	end
+end
+
+RunService.RenderStepped:Connect(function()
+	if showHitboxes then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player.Character then
+				local hitbox = player.Character:FindFirstChild("HumanoidRootPart")
+				if hitbox then highlightHitbox(hitbox) end
+			end
+		end
+	end
+end)
+
+-- Infinity UI Style
+local gui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+gui.Name = "InfinityHitboxUI"
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 320, 0, 220)
+frame.Position = UDim2.new(0.5, -160, 0.5, -110)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundTransparency = 0.1
+frame.Active = true
+frame.Draggable = true
+frame.ClipsDescendants = true
+frame.Name = "MainFrame"
+
+local uiCorner = Instance.new("UICorner", frame)
+uiCorner.CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel", frame)
+title.Text = "🔍 Hitbox Viewer"
+title.Size = UDim2.new(1, -20, 0, 40)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local closeBtn = Instance.new("TextButton", frame)
+closeBtn.Text = "×"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -40, 0, 10)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 20
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+
+local minimizeBtn = Instance.new("TextButton", frame)
+minimizeBtn.Text = "-"
+minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+minimizeBtn.Position = UDim2.new(1, -80, 0, 10)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 20
+Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 8)
+
+local content = Instance.new("Frame", frame)
+content.Size = UDim2.new(1, -20, 1, -60)
+content.Position = UDim2.new(0, 10, 0, 50)
+content.BackgroundTransparency = 1
+
+local boxLabel = Instance.new("TextLabel", content)
+boxLabel.Text = "Colore Hitbox"
+boxLabel.Size = UDim2.new(1, 0, 0, 20)
+boxLabel.Position = UDim2.new(0, 0, 0, 0)
+boxLabel.BackgroundTransparency = 1
+boxLabel.TextColor3 = Color3.new(1, 1, 1)
+boxLabel.Font = Enum.Font.Gotham
+boxLabel.TextSize = 16
+
+local outlineLabel = Instance.new("TextLabel", content)
+outlineLabel.Text = "Contorno Hitbox"
+outlineLabel.Size = UDim2.new(1, 0, 0, 20)
+outlineLabel.Position = UDim2.new(0, 0, 0, 90)
+outlineLabel.BackgroundTransparency = 1
+outlineLabel.TextColor3 = Color3.new(1, 1, 1)
+outlineLabel.Font = Enum.Font.Gotham
+outlineLabel.TextSize = 16
+
+local palette = {
+	Color3.fromRGB(255, 0, 0),
+	Color3.fromRGB(0, 255, 0),
+	Color3.fromRGB(0, 0, 255),
+	Color3.fromRGB(255, 255, 0),
+	Color3.fromRGB(255, 255, 255),
+	Color3.fromRGB(0, 0, 0)
+}
+
+for i, color in ipairs(palette) do
+	local boxBtn = Instance.new("TextButton", content)
+	boxBtn.Size = UDim2.new(0, 30, 0, 30)
+	boxBtn.Position = UDim2.new(0, 10 + (i - 1) * 35, 0, 30)
+	boxBtn.BackgroundColor3 = color
+	boxBtn.Text = ""
+	boxBtn.AutoButtonColor = false
+	Instance.new("UICorner", boxBtn).CornerRadius = UDim.new(0, 6)
+	boxBtn.MouseButton1Click:Connect(function()
+		boxColor = color
+	end)
+
+	local outlineBtn = Instance.new("TextButton", content)
+	outlineBtn.Size = UDim2.new(0, 30, 0, 30)
+	outlineBtn.Position = UDim2.new(0, 10 + (i - 1) * 35, 0, 120)
+	outlineBtn.BackgroundColor3 = color
+	outlineBtn.Text = ""
+	outlineBtn.AutoButtonColor = false
+	Instance.new("UICorner", outlineBtn).CornerRadius = UDim.new(0, 6)
+	outlineBtn.MouseButton1Click:Connect(function()
+		outlineColor = color
+	end)
+end
+
+-- Minimizza
+local minimized = false
+minimizeBtn.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	content.Visible = not minimized
+	frame.Size = minimized and UDim2.new(0, 320, 0, 60) or UDim2.new(0, 320, 0, 220)
+end)
+
+-- Chiudi
+closeBtn.MouseButton1Click:Connect(function()
+	showHitboxes = false
+	guiVisible = false
+	frame.Visible = false
+	removeHitboxes()
+end)
+
+-- Toggle con H
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.H then
+		showHitboxes = true
+		guiVisible = true
+		frame.Visible = true
+	end
+end)
